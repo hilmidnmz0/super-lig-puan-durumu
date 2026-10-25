@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Süper Lig Puan Durumu</title>
+<style>
+:root{
+  --bg:#fbf7f1; --panel:#ffffff; --ink:#1f1a33; --muted:#6b6580; --line:#ece4d8;
+  --c1:#ff6b4a; --c2:#7b5cff; --c3:#14b8a6; --c4:#f5a524;
+  --ok:#0e7f3f; --bad:#c9272d; --soft:#fff1ea; --btn:#5b3fe0;
+  --z-champ:#f5a524; --z-euro:#14b8a6; --z-rel:#e5484d;
+  --sans:"Segoe UI",system-ui,sans-serif; --mono:Consolas,ui-monospace,monospace;
+  --shadow:0 1px 2px rgba(31,26,51,.05),0 10px 30px -12px rgba(31,26,51,.18);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14121f; --panel:#1d1a2c; --ink:#f1eef9; --muted:#a59fbd; --line:#2e2a43;
+  --c1:#ff8a6e; --c2:#9d85ff; --c3:#3dd6c2; --c4:#ffbe4d; --ok:#4ade80; --bad:#ff7a7f; --soft:#2a2238; --btn:#8f78ff;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px -14px rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14121f; --panel:#1d1a2c; --ink:#f1eef9; --muted:#a59fbd; --line:#2e2a43;
+  --c1:#ff8a6e; --c2:#9d85ff; --c3:#3dd6c2; --c4:#ffbe4d; --ok:#4ade80; --bad:#ff7a7f; --soft:#2a2238; --btn:#8f78ff;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px -14px rgba(0,0,0,.6); color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;padding:24px 16px 56px;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:980px;margin:0 auto;display:grid;gap:18px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:26px;background:linear-gradient(135deg,var(--c3),var(--c2))}
+h1{margin:0;font-size:24px;line-height:1.2}
+header p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+header .sp{flex:1}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:14px;box-shadow:var(--shadow);min-width:0}
+.card h2{margin:0;font-size:17px;display:flex;align-items:center;gap:10px}
+.card h2 .n{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:var(--c,var(--c2));color:#fff;font-size:14px;flex:none}
+label{font-size:12.5px;font-weight:700;color:var(--muted);display:grid;gap:4px;min-width:0}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:9px 11px;width:100%;min-width:0}
+input[type=color]{padding:2px;height:40px;width:52px;cursor:pointer}
+textarea{font-family:var(--mono);font-size:13px;min-height:110px;resize:vertical}
+:focus-visible{outline:3px solid var(--c2);outline-offset:2px}
+button{font:inherit;font-weight:700;cursor:pointer;border-radius:12px;padding:9px 16px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink)}
+button:hover{border-color:var(--btn)}
+button.pri{background:var(--btn);border-color:var(--btn);color:#fff}
+html:not([data-theme="dark"]) button.pri{color:#fff}
+button.dng{color:var(--bad);border-color:var(--bad)}
+button.sm{padding:4px 10px;font-size:13px;border-radius:9px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.row>*{flex:1 1 130px}
+.row>button{flex:0 0 auto}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.note{font-size:13px;color:var(--muted)}
+.msg{font-size:13.5px;font-weight:600;min-height:20px}
+.msg.err{color:var(--bad)} .msg.ok{color:var(--ok)}
+/* table */
+.tw{border-radius:12px;border:1px solid var(--line);overflow:hidden}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{padding:7px 4px;text-align:center;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--line);font-size:14px}
+th{font-size:12px;color:var(--muted);background:var(--soft);font-weight:700}
+tr:last-child td{border-bottom:0}
+th.tm,td.tm{text-align:left;padding-left:8px;width:auto}
+th.rk,td.rk{width:34px}
+td.pt{font-weight:800}
+th.num,td.num{width:38px}
+td.tm{overflow:hidden}
+.zc{box-shadow:inset 5px 0 0 var(--z-champ)} .ze{box-shadow:inset 5px 0 0 var(--z-euro)} .zr{box-shadow:inset 5px 0 0 var(--z-rel)}
+tr.zc td.rk{background:color-mix(in srgb,var(--z-champ) 22%,transparent)}
+tr.ze td.rk{background:color-mix(in srgb,var(--z-euro) 22%,transparent)}
+tr.zr td.rk{background:color-mix(in srgb,var(--z-rel) 22%,transparent)}
+.badge{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:10px;font-size:11px;font-weight:800;color:#fff;flex:none;text-shadow:0 1px 1px rgba(0,0,0,.5)}
+.tn{display:flex;align-items:center;gap:8px;min-width:0}
+.tn .nm{min-width:0}
+.tn .nm b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.form{display:flex;gap:3px;margin-top:2px;min-height:18px}
+.f{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;font-size:10.5px;font-weight:800;color:#fff}
+.f.G{background:#0e7f3f}.f.B{background:#6b6580}.f.M{background:#c9272d}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+.zset{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+/* maçlar */
+.wk{display:grid;gap:6px}
+.wk h3{margin:6px 0 0;font-size:14px;color:var(--muted)}
+.mt{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:6px 10px;background:var(--bg)}
+.mt .h{text-align:right;overflow-wrap:anywhere} .mt .a{overflow-wrap:anywhere}
+.mt .sc{font-weight:800;font-family:var(--mono);padding:2px 10px;border-radius:8px;background:var(--soft)}
+.mt .ac{display:flex;gap:6px}
+.tl{display:grid;gap:8px}
+.tr{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:6px 10px;background:var(--bg)}
+.tr .nm{flex:1 1 140px;min-width:0;overflow-wrap:anywhere;font-weight:600}
+.tr input[type=text]{flex:2 1 160px}
+.pre{font-family:var(--mono);font-size:12.5px;display:grid;gap:3px}
+.pre .okl{color:var(--ok)} .pre .badl{color:var(--bad)}
+.empty{color:var(--muted);text-align:center;padding:14px}
+@media (max-width:520px){
+  body{padding:16px 10px 40px}
+  th.hy,td.hy{display:none}
+  th,td{font-size:13px}
+  .mt{grid-template-columns:1fr auto 1fr;}
+  .mt .ac{grid-column:1/-1;justify-content:flex-end}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo" aria-hidden="true">⚽</div>
+    <div>
+      <h1>Süper Lig Puan Durumu</h1>
+      <p>Trendyol Süper Lig 2026-27 · verileri sen gir, tablo anında hesaplansın</p>
+    </div>
+    <span class="sp"></span>
+    <button id="themeBtn" type="button" aria-label="Temayı değiştir">🌓 Tema</button>
+  </header>
+
+  <section class="card" style="--c:var(--c3)" aria-labelledby="h-tablo">
+    <h2 id="h-tablo"><span class="n">1</span>Puan durumu</h2>
+    <div class="tw"><table id="tbl">
+      <thead><tr>
+        <th class="rk" scope="col" title="Sıra">#</th><th class="tm" scope="col">Takım</th>
+        <th class="num" scope="col" title="Oynanan">O</th><th class="num" scope="col" title="Galibiyet">G</th>
+        <th class="num" scope="col" title="Beraberlik">B</th><th class="num" scope="col" title="Mağlubiyet">M</th>
+        <th class="num hy" scope="col" title="Attığı gol">A</th><th class="num hy" scope="col" title="Yediği gol">Y</th>
+        <th class="num" scope="col" title="Averaj">AV</th><th class="num" scope="col" title="Puan">P</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+    <div class="legend" id="legend"></div>
+    <p class="note">Sıralama: önce puan, eşitlikte averaj, sonra atılan gol, sonra takım adı (Türkçe alfabe sırası). Galibiyet 3, beraberlik 1, mağlubiyet 0 puan. Form: son 5 maç (en yeni sağda).</p>
+    <div class="zset">
+      <label>Şampiyon sayısı<input type="number" id="zChamp" min="0" max="20" step="1"></label>
+      <label>Avrupa kupası sayısı<input type="number" id="zEuro" min="0" max="20" step="1"></label>
+      <label>Küme düşen sayısı<input type="number" id="zRel" min="0" max="20" step="1"></label>
+    </div>
+    <div class="msg" id="zMsg" role="status"></div>
+  </section>
+
+  <section class="card" style="--c:var(--c1)" aria-labelledby="h-mac">
+    <h2 id="h-mac"><span class="n">2</span>Maç ekle / düzenle</h2>
+    <form id="mForm" class="row" novalidate>
+      <label style="flex:0 1 90px">Hafta<input type="number" id="mWeek" min="1" max="99" step="1" value="1" required></label>
+      <label>Ev sahibi<select id="mHome" required></select></label>
+      <label style="flex:0 1 80px">Ev skor<input type="number" id="mHg" min="0" step="1" required inputmode="numeric"></label>
+      <label style="flex:0 1 80px">Dep. skor<input type="number" id="mAg" min="0" step="1" required inputmode="numeric"></label>
+      <label>Deplasman<select id="mAway" required></select></label>
+      <button class="pri" type="submit" id="mSubmit">Maç ekle</button>
+      <button type="button" id="mCancel" hidden>Vazgeç</button>
+    </form>
+    <div class="msg" id="mMsg" role="status"></div>
+
+    <div class="row">
+      <label style="flex:0 1 200px">Hafta filtresi<select id="wFilter"></select></label>
+    </div>
+    <div id="mList"></div>
+  </section>
+
+  <section class="card" style="--c:var(--c4)" aria-labelledby="h-takim">
+    <h2 id="h-takim"><span class="n">3</span>Takımlar</h2>
+    <form id="tForm" class="row" novalidate>
+      <label style="flex:2 1 200px">Yeni takım adı<input type="text" id="tName" maxlength="40" autocomplete="off"></label>
+      <label style="flex:0 0 auto">Renk<input type="color" id="tColor" value="#7b5cff"></label>
+      <button class="pri" type="submit">Takım ekle</button>
+    </form>
+    <div class="msg" id="tMsg" role="status"></div>
+    <div class="tl" id="tList"></div>
+    <p class="note">Logo kullanılmaz; rozet, takım adının baş harflerinden ve seçtiğin renkten oluşur.</p>
+  </section>
+
+  <section class="card" style="--c:var(--c2)" aria-labelledby="h-toplu">
+    <h2 id="h-toplu"><span class="n">4</span>Toplu maç girişi</h2>
+    <p class="note">Her satıra bir maç: <code>Galatasaray 2-1 Fenerbahçe</code>. Satırın başına hafta yazabilirsin: <code>5: Beşiktaş 0-0 Göztepe</code>. Başında hafta yazılmayan satırlar aşağıdaki varsayılan haftaya girer. Takım adları listedekiyle aynı olmalı (büyük/küçük harf ve aksan farkı önemsiz).</p>
+    <div class="row">
+      <label style="flex:0 1 160px">Varsayılan hafta<input type="number" id="bWeek" min="1" max="99" step="1" value="1"></label>
+    </div>
+    <textarea id="bText" aria-label="Toplu maç metni" placeholder="Galatasaray 2-1 Fenerbahçe&#10;3: Beşiktaş 1-1 Trabzonspor"></textarea>
+    <div class="pre" id="bPrev" aria-live="polite"></div>
+    <div class="btns"><button class="pri" type="button" id="bAdd">Geçerli satırları ekle</button></div>
+  </section>
+
+  <section class="card" style="--c:var(--ok)" aria-labelledby="h-veri">
+    <h2 id="h-veri"><span class="n">5</span>Veri</h2>
+    <div class="btns">
+      <button type="button" id="exJson">JSON dışa aktar</button>
+      <button type="button" id="imJson">JSON içe aktar</button>
+      <button type="button" id="exCsv">Puan durumu CSV</button>
+      <button type="button" class="dng" id="reset">Her şeyi sıfırla</button>
+      <input type="file" id="fileIn" accept="application/json,.json" hidden>
+    </div>
+    <div class="msg" id="vMsg" role="status"></div>
+    <p class="note" id="saveNote">Veriler bu tarayıcıda (localStorage) saklanır. Başka cihaza taşımak için JSON dışa aktar.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+var KEY='superlig-puan-v1';
+var TR='tr';
+var DEFAULT_TEAMS=[
+ ['Galatasaray','#e8a100'],['Fenerbahçe','#1b3a8a'],['Beşiktaş','#222222'],['Trabzonspor','#7a1f3d'],
+ ['İstanbul Başakşehir','#e8590c'],['Kasımpaşa','#1c4fa0'],['Eyüpspor','#7b2d8e'],['Göztepe','#c0392b'],
+ ['Samsunspor','#d62828'],['Çaykur Rizespor','#1b8a5a'],['Konyaspor','#2b7a3d'],['Kocaelispor','#1e7a4c'],
+ ['Alanyaspor','#e07a00'],['Gaziantep FK','#b5121b'],['Gençlerbirliği','#a31621'],['Erzurumspor FK','#0b6fb3'],
+ ['Amed SFK','#9c1c1c'],['Çorum FK','#4a4a4a']
+];
+var state;
+var storageOk=true;
+var editing=null;
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function $(id){return document.getElementById(id)}
+function norm(s){return String(s).trim().toLocaleLowerCase(TR)}
+function fold(s){
+  return norm(s).replace(/ı/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c').replace(/\s+/g,' ');
+}
+function freshState(){
+  return {teams:DEFAULT_TEAMS.map(function(t){return {id:uid(),name:t[0],color:t[1]}}),matches:[],zones:{champ:1,euro:3,rel:3}};
+}
+function isInt(n){return typeof n==='number'&&isFinite(n)&&Math.floor(n)===n}
+
+function sanitize(d){
+  if(!d||typeof d!=='object'||!Array.isArray(d.teams)||!Array.isArray(d.matches))throw new Error('Geçersiz dosya biçimi (teams ve matches gerekli).');
+  var ids={},names={},teams=[];
+  d.teams.forEach(function(t){
+    if(!t||typeof t.name!=='string'||!t.name.trim())throw new Error('Adsız takım var.');
+    var id=String(t.id||uid()); var nk=norm(t.name);
+    if(ids[id]||names[nk])throw new Error('Yinelenen takım: '+t.name);
+    ids[id]=1;names[nk]=1;
+    teams.push({id:id,name:t.name.trim().slice(0,40),color:/^#[0-9a-fA-F]{6}$/.test(t.color)?t.color:'#7b5cff'});
+  });
+  var matches=d.matches.map(function(m,i){
+    if(!m||!ids[m.home]||!ids[m.away])throw new Error((i+1)+'. maçın takımı bulunamadı.');
+    if(m.home===m.away)throw new Error((i+1)+'. maçta aynı takım iki kez var.');
+    if(!isInt(m.hg)||!isInt(m.ag)||m.hg<0||m.ag<0)throw new Error((i+1)+'. maçın skoru geçersiz.');
+    if(!isInt(m.week)||m.week<1)throw new Error((i+1)+'. maçın haftası geçersiz.');
+    return {id:String(m.id||uid()),week:m.week,home:m.home,away:m.away,hg:m.hg,ag:m.ag};
+  });
+  var z=d.zones||{};
+  function zi(v,def){return isInt(v)&&v>=0&&v<=40?v:def}
+  return {teams:teams,matches:matches,zones:{champ:zi(z.champ,1),euro:zi(z.euro,3),rel:zi(z.rel,3)}};
+}
+
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){state=sanitize(JSON.parse(raw));return}
+  }catch(e){storageOk=false}
+  state=freshState();
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(state));storageOk=true}
+  catch(e){storageOk=false}
+  $('saveNote').textContent=storageOk?'Veriler bu tarayıcıda (localStorage) saklanır. Başka cihaza taşımak için JSON dışa aktar.':'Uyarı: tarayıcı depolaması kullanılamıyor; veriler yalnızca bu sayfa açıkken durur. JSON dışa aktar ile yedekle.';
+}
+
+function teamById(id){for(var i=0;i<state.teams.length;i++)if(state.teams[i].id===id)return state.teams[i];return null}
+function initials(name){
+  var w=name.trim().split(/\s+/).filter(Boolean);
+  var s=w.length>1?w.slice(0,2).map(function(x){return x.charAt(0)}).join(''):name.trim().slice(0,2);
+  return s.toLocaleUpperCase(TR);
+}
+function badge(t){
+  var b=document.createElement('span');b.className='badge';b.style.background=t.color;b.textContent=initials(t.name);b.setAttribute('aria-hidden','true');return b;
+}
+function sortedMatches(){
+  return state.matches.map(function(m,i){return {m:m,i:i}}).sort(function(a,b){return a.m.week-b.m.week||a.i-b.i}).map(function(x){return x.m});
+}
+
+function compute(){
+  var rows={};
+  state.teams.forEach(function(t){rows[t.id]={t:t,o:0,g:0,b:0,m:0,a:0,y:0,p:0,form:[]}});
+  sortedMatches().forEach(function(m){
+    var h=rows[m.home],a=rows[m.away];if(!h||!a)return;
+    h.o++;a.o++;h.a+=m.hg;h.y+=m.ag;a.a+=m.ag;a.y+=m.hg;
+    if(m.hg>m.ag){h.g++;a.m++;h.p+=3;h.form.push('G');a.form.push('M')}
+    else if(m.hg<m.ag){a.g++;h.m++;a.p+=3;h.form.push('M');a.form.push('G')}
+    else{h.b++;a.b++;h.p++;a.p++;h.form.push('B');a.form.push('B')}
+  });
+  var arr=Object.keys(rows).map(function(k){var r=rows[k];r.av=r.a-r.y;return r});
+  arr.sort(function(x,y){return y.p-x.p||y.av-x.av||y.a-x.a||x.t.name.localeCompare(y.t.name,TR)});
+  return arr;
+}
+function effZones(){
+  var n=state.teams.length,z=state.zones;
+  var c=Math.min(z.champ,n),r=Math.min(z.rel,n-c),e=Math.min(z.euro,n-c-r);
+  return {champ:c,euro:e,rel:r,clamped:(c!==z.champ||r!==z.rel||e!==z.euro)};
+}
+
+function renderTable(){
+  var rows=compute(),z=effZones(),n=rows.length,tb=$('tbody');
+  tb.textContent='';
+  if(!n){var tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=10;td.className='empty';td.textContent='Henüz takım yok.';tr.appendChild(td);tb.appendChild(tr)}
+  rows.forEach(function(r,i){
+    var cls=i<z.champ?'zc':(i<z.champ+z.euro?'ze':(i>=n-z.rel?'zr':''));
+    var tr=document.createElement('tr');tr.className=cls;
+    function cell(txt,c){var td=document.createElement('td');td.textContent=txt;if(c)td.className=c;tr.appendChild(td);return td}
+    cell(i+1,'rk');
+    var td=document.createElement('td');td.className='tm';
+    var wrap=document.createElement('div');wrap.className='tn';wrap.appendChild(badge(r.t));
+    var nm=document.createElement('div');nm.className='nm';
+    var b=document.createElement('b');b.textContent=r.t.name;b.title=r.t.name;nm.appendChild(b);
+    var f=document.createElement('div');f.className='form';
+    var last=r.form.slice(-5);
+    f.setAttribute('aria-label','Son maçlar: '+(last.join(' ')||'yok'));
+    last.forEach(function(x){var s=document.createElement('span');s.className='f '+x;s.textContent=x;s.setAttribute('aria-hidden','true');f.appendChild(s)});
+    nm.appendChild(f);wrap.appendChild(nm);td.appendChild(wrap);tr.appendChild(td);
+    cell(r.o,'num');cell(r.g,'num');cell(r.b,'num');cell(r.m,'num');
+    cell(r.a,'num hy');cell(r.y,'num hy');
+    cell((r.av>0?'+':'')+r.av,'num');cell(r.p,'num pt');
+    tb.appendChild(tr);
+  });
+  var lg=$('legend');lg.textContent='';
+  [['--z-champ','Şampiyon ('+z.champ+')'],['--z-euro','Avrupa kupaları ('+z.euro+')'],['--z-rel','Küme düşme ('+z.rel+')']].forEach(function(x){
+    var s=document.createElement('span'),i=document.createElement('i');i.style.background='var('+x[0]+')';s.appendChild(i);s.appendChild(document.createTextNode(x[1]));lg.appendChild(s);
+  });
+  $('zChamp').value=state.zones.champ;$('zEuro').value=state.zones.euro;$('zRel').value=state.zones.rel;
+  var zm=$('zMsg');
+  if(z.clamped){zm.className='msg err';zm.textContent='Bölge sayıları takım sayısını ('+n+') aşıyor; gösterimde '+z.champ+' / '+z.euro+' / '+z.rel+' olarak kısıtlandı.'}
+  else{zm.className='msg';zm.textContent=''}
+}
+
+function fillSelect(sel,keep){
+  var v=keep?sel.value:'';sel.textContent='';
+  var o=document.createElement('option');o.value='';o.textContent='Seç…';sel.appendChild(o);
+  state.teams.slice().sort(function(a,b){return a.name.localeCompare(b.name,TR)}).forEach(function(t){
+    var op=document.createElement('option');op.value=t.id;op.textContent=t.name;sel.appendChild(op);
+  });
+  if(v&&teamById(v))sel.value=v;
+}
+function renderSelects(){
+  fillSelect($('mHome'),true);fillSelect($('mAway'),true);
+  var wf=$('wFilter'),cur=wf.value||'all';wf.textContent='';
+  var o=document.createElement('option');o.value='all';o.textContent='Tüm haftalar';wf.appendChild(o);
+  var weeks={};state.matches.forEach(function(m){weeks[m.week]=1});
+  Object.keys(weeks).map(Number).sort(function(a,b){return a-b}).forEach(function(w){
+    var op=document.createElement('option');op.value=String(w);op.textContent=w+'. hafta';wf.appendChild(op);
+  });
+  wf.value=weeks[cur]||cur==='all'?cur:'all';
+  if(wf.value!==cur&&cur!=='all')wf.value='all';
+}
+function renderMatches(){
+  var box=$('mList');box.textContent='';
+  var f=$('wFilter').value;
+  var list=sortedMatches().filter(function(m){return f==='all'||String(m.week)===f});
+  if(!list.length){var d=document.createElement('div');d.className='empty';d.textContent=state.matches.length?'Bu hafta için maç yok.':'Henüz maç girilmedi.';box.appendChild(d);return}
+  var cur=null,grp=null;
+  list.forEach(function(m){
+    if(m.week!==cur){cur=m.week;grp=document.createElement('div');grp.className='wk';var h=document.createElement('h3');h.textContent=m.week+'. hafta';grp.appendChild(h);box.appendChild(grp)}
+    var h=teamById(m.home),a=teamById(m.away);
+    var el=document.createElement('div');el.className='mt';
+    var s1=document.createElement('span');s1.className='h';s1.textContent=h?h.name:'?';
+    var sc=document.createElement('span');sc.className='sc';sc.textContent=m.hg+' - '+m.ag;
+    var s2=document.createElement('span');s2.className='a';s2.textContent=a?a.name:'?';
+    var ac=document.createElement('span');ac.className='ac';
+    var eb=document.createElement('button');eb.type='button';eb.className='sm';eb.textContent='Düzenle';eb.setAttribute('aria-label',(h?h.name:'')+' - '+(a?a.name:'')+' maçını düzenle');
+    eb.onclick=function(){startEdit(m.id)};
+    var db=document.createElement('button');db.type='button';db.className='sm dng';db.textContent='Sil';db.setAttribute('aria-label',(h?h.name:'')+' - '+(a?a.name:'')+' maçını sil');
+    db.onclick=function(){if(confirm('Bu maç silinsin mi?')){state.matches=state.matches.filter(function(x){return x.id!==m.id});if(editing===m.id)stopEdit();changed()}};
+    ac.appendChild(eb);ac.appendChild(db);
+    el.appendChild(s1);el.appendChild(sc);el.appendChild(s2);el.appendChild(ac);grp.appendChild(el);
+  });
+}
+function renderTeams(){
+  var box=$('tList');box.textContent='';
+  if(!state.teams.length){var d=document.createElement('div');d.className='empty';d.textContent='Takım yok. Yukarıdan ekle.';box.appendChild(d);return}
+  state.teams.slice().sort(function(a,b){return a.name.localeCompare(b.name,TR)}).forEach(function(t){
+    var r=document.createElement('div');r.className='tr';
+    r.appendChild(badge(t));
+    var inp=document.createElement('input');inp.type='text';inp.value=t.name;inp.maxLength=40;inp.setAttribute('aria-label',t.name+' adı');
+    var col=document.createElement('input');col.type='color';col.value=t.color;col.setAttribute('aria-label',t.name+' rengi');
+    var sv=document.createElement('button');sv.type='button';sv.className='sm';sv.textContent='Adı kaydet';
+    sv.onclick=function(){
+      var nn=inp.value.trim();
+      if(!nn){setMsg('tMsg','Takım adı boş olamaz.',1);return}
+      if(state.teams.some(function(x){return x.id!==t.id&&norm(x.name)===norm(nn)})){setMsg('tMsg','Bu adda başka bir takım var.',1);return}
+      t.name=nn;setMsg('tMsg','Takım adı güncellendi.');changed();
+    };
+    col.onchange=function(){t.color=col.value;changed()};
+    var del=document.createElement('button');del.type='button';del.className='sm dng';del.textContent='Sil';del.setAttribute('aria-label',t.name+' takımını sil');
+    del.onclick=function(){
+      var cnt=state.matches.filter(function(m){return m.home===t.id||m.away===t.id}).length;
+      var q=cnt?t.name+' takımının '+cnt+' maçı var. Takımı silersen bu maçlar da silinir. Devam edilsin mi?':t.name+' silinsin mi?';
+      if(!confirm(q))return;
+      state.teams=state.teams.filter(function(x){return x.id!==t.id});
+      state.matches=state.matches.filter(function(m){return m.home!==t.id&&m.away!==t.id});
+      if(editing)stopEdit();
+      setMsg('tMsg',t.name+' silindi'+(cnt?' ('+cnt+' maç ile birlikte)':'')+'.');changed();
+    };
+    r.appendChild(inp);r.appendChild(col);r.appendChild(sv);r.appendChild(del);box.appendChild(r);
+  });
+}
+
+function setMsg(id,txt,err){var e=$(id);e.textContent=txt;e.className='msg'+(txt?(err?' err':' ok'):'')}
+function changed(){save();renderAll()}
+function renderAll(){renderTable();renderSelects();renderMatches();renderTeams();renderPreview()}
+
+/* maç formu */
+function startEdit(id){
+  var m=state.matches.filter(function(x){return x.id===id})[0];if(!m)return;
+  editing=id;
+  $('mWeek').value=m.week;$('mHome').value=m.home;$('mAway').value=m.away;$('mHg').value=m.hg;$('mAg').value=m.ag;
+  $('mSubmit').textContent='Maçı güncelle';$('mCancel').hidden=false;setMsg('mMsg','Maç düzenleniyor…');
+  $('mWeek').scrollIntoView({block:'center'});$('mHg').focus();
+}
+function stopEdit(){editing=null;$('mSubmit').textContent='Maç ekle';$('mCancel').hidden=true;$('mHg').value='';$('mAg').value=''}
+$('mCancel').onclick=function(){stopEdit();setMsg('mMsg','')};
+$('mForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var wk=Number($('mWeek').value),h=$('mHome').value,a=$('mAway').value;
+  var hgS=$('mHg').value.trim(),agS=$('mAg').value.trim(),hg=Number(hgS),ag=Number(agS);
+  if(!isInt(wk)||wk<1||wk>99)return setMsg('mMsg','Hafta 1-99 arasında tam sayı olmalı.',1);
+  if(!h||!a)return setMsg('mMsg','Ev sahibi ve deplasman takımını seç.',1);
+  if(h===a)return setMsg('mMsg','Aynı takım iki kez seçilemez.',1);
+  if(hgS===''||agS===''||!isInt(hg)||!isInt(ag))return setMsg('mMsg','Skorlar tam sayı olmalı.',1);
+  if(hg<0||ag<0)return setMsg('mMsg','Skor negatif olamaz.',1);
+  if(editing){
+    var m=state.matches.filter(function(x){return x.id===editing})[0];
+    if(m){m.week=wk;m.home=h;m.away=a;m.hg=hg;m.ag=ag}
+    stopEdit();setMsg('mMsg','Maç güncellendi.');
+  }else{
+    state.matches.push({id:uid(),week:wk,home:h,away:a,hg:hg,ag:ag});
+    $('mHg').value='';$('mAg').value='';setMsg('mMsg','Maç eklendi.');
+  }
+  changed();
+});
+$('wFilter').onchange=renderMatches;
+
+/* takım formu */
+$('tForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var nn=$('tName').value.trim();
+  if(!nn)return setMsg('tMsg','Takım adı boş olamaz.',1);
+  if(state.teams.some(function(x){return norm(x.name)===norm(nn)}))return setMsg('tMsg','Bu adda bir takım zaten var.',1);
+  state.teams.push({id:uid(),name:nn,color:$('tColor').value});
+  $('tName').value='';setMsg('tMsg',nn+' eklendi.');changed();
+});
+
+/* bölgeler */
+['zChamp','zEuro','zRel'].forEach(function(id){
+  $(id).onchange=function(){
+    function v(i){var x=Math.floor(Number($(i).value));return isFinite(x)&&x>=0?Math.min(x,40):0}
+    state.zones={champ:v('zChamp'),euro:v('zEuro'),rel:v('zRel')};changed();
+  };
+});
+
+/* toplu giriş */
+function findTeam(name){
+  var k=norm(name),f=fold(name),i;
+  for(i=0;i<state.teams.length;i++)if(norm(state.teams[i].name)===k)return state.teams[i];
+  for(i=0;i<state.teams.length;i++)if(fold(state.teams[i].name)===f)return state.teams[i];
+  return null;
+}
+function parseBulk(){
+  var defW=Number($('bWeek').value),out=[];
+  $('bText').value.split(/\r?\n/).forEach(function(line,idx){
+    var raw=line.trim();if(!raw)return;
+    var wk=defW,s=raw;
+    var mw=s.match(/^(?:hafta\s*)?(\d{1,2})\s*(?:\.\s*hafta)?\s*[:|]\s*(.+)$/i);
+    if(mw){wk=Number(mw[1]);s=mw[2]}
+    var r={line:idx+1,raw:raw,week:wk};
+    var m=s.match(/^(.+?)\s+(\d+)\s*[-–:]\s*(\d+)\s+(.+)$/);
+    if(!isInt(wk)||wk<1||wk>99){r.err='Hafta geçersiz';out.push(r);return}
+    if(!m){r.err='Biçim "Takım 2-1 Takım" olmalı';out.push(r);return}
+    var h=findTeam(m[1]),a=findTeam(m[4]);
+    if(!h){r.err='Takım bulunamadı: '+m[1].trim();out.push(r);return}
+    if(!a){r.err='Takım bulunamadı: '+m[4].trim();out.push(r);return}
+    if(h===a){r.err='Aynı takım iki kez';out.push(r);return}
+    r.home=h.id;r.away=a.id;r.hg=Number(m[2]);r.ag=Number(m[3]);out.push(r);
+  });
+  return out;
+}
+function renderPreview(){
+  var box=$('bPrev');box.textContent='';
+  var res=parseBulk();
+  res.forEach(function(r){
+    var d=document.createElement('div');
+    if(r.err){d.className='badl';d.textContent='✗ Satır '+r.line+': '+r.err+' — "'+r.raw+'"'}
+    else{d.className='okl';d.textContent='✓ Satır '+r.line+': '+r.week+'. hafta · '+teamById(r.home).name+' '+r.hg+'-'+r.ag+' '+teamById(r.away).name}
+    box.appendChild(d);
+  });
+}
+$('bText').oninput=renderPreview;$('bWeek').oninput=renderPreview;
+$('bAdd').onclick=function(){
+  var ok=parseBulk().filter(function(r){return !r.err});
+  var bad=parseBulk().length-ok.length;
+  if(!ok.length)return setMsg('vMsg','Eklenecek geçerli satır yok.',1);
+  ok.forEach(function(r){state.matches.push({id:uid(),week:r.week,home:r.home,away:r.away,hg:r.hg,ag:r.ag})});
+  $('bText').value='';
+  setMsg('vMsg',ok.length+' maç eklendi'+(bad?', '+bad+' hatalı satır atlandı (önizlemeden düzeltip tekrar dene)':'')+'.');
+  changed();
+  // hatalı satırlar metinde kalmasın diye zaten temizlendi; kullanıcı önizlemede görmüştü
+};
+
+/* dışa/içe aktarma */
+function download(name,text,type){
+  var b=new Blob([text],{type:type}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},1000);
+}
+$('exJson').onclick=function(){
+  download('super-lig-puan-durumu.json',JSON.stringify(state,null,2),'application/json');
+  setMsg('vMsg','JSON dışa aktarıldı.');
+};
+$('imJson').onclick=function(){$('fileIn').click()};
+$('fileIn').onchange=function(){
+  var f=this.files&&this.files[0];if(!f)return;
+  var inp=this;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var d=sanitize(JSON.parse(rd.result));
+      if(!confirm('Mevcut veri bu dosyayla değiştirilsin mi? ('+d.teams.length+' takım, '+d.matches.length+' maç)'))return;
+      state=d;stopEdit();changed();setMsg('vMsg','JSON içe aktarıldı.');
+    }catch(e){setMsg('vMsg','İçe aktarılamadı: '+e.message,1)}
+    inp.value='';
+  };
+  rd.onerror=function(){setMsg('vMsg','Dosya okunamadı.',1)};
+  rd.readAsText(f);
+};
+$('exCsv').onclick=function(){
+  var rows=compute();
+  function q(s){s=String(s);return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
+  var lines=[['Sıra','Takım','O','G','B','M','A','Y','AV','P','Form'].join(';')];
+  rows.forEach(function(r,i){lines.push([i+1,q(r.t.name),r.o,r.g,r.b,r.m,r.a,r.y,r.av,r.p,r.form.slice(-5).join('')].join(';'))});
+  download('super-lig-puan-durumu.csv','﻿'+lines.join('\r\n')+'\r\n','text/csv;charset=utf-8');
+  setMsg('vMsg','CSV dışa aktarıldı (ayraç: noktalı virgül, Excel Türkçe uyumlu).');
+};
+$('reset').onclick=function(){
+  if(!confirm('Tüm takımlar, maçlar ve ayarlar silinip varsayılan 18 takımlı boş duruma dönülecek. Emin misin?'))return;
+  state=freshState();stopEdit();$('wFilter').value='all';changed();setMsg('vMsg','Her şey sıfırlandı.');
+};
+
+/* tema */
+$('themeBtn').onclick=function(){
+  var r=document.documentElement,dark=r.getAttribute('data-theme')==='dark'||(!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);
+  var nt=dark?'light':'dark';r.setAttribute('data-theme',nt);
+  try{localStorage.setItem(KEY+'-theme',nt)}catch(e){}
+};
+try{var th=localStorage.getItem(KEY+'-theme');if(th)document.documentElement.setAttribute('data-theme',th)}catch(e){}
+
+load();save();renderAll();
+})();
+</script>
+</body>
+</html>
